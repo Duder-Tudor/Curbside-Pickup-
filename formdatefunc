@@ -1,0 +1,53 @@
+function updateFormWithDays() {
+  // Open the Google Form by its ID
+  const form = FormApp.openById("1Di7Beuw4uw54esZXxTUlPne_0gZqn4do7h6HfBx6sto");
+
+  // Open the Master Sheet by its ID
+  const spreadsheet = SpreadsheetApp.openById("1EwuNdI-3KvBql2lelV31UG-J7YUlOhfAPGJ13VpGC7k");
+
+  //Pull Dates sheet from Master Sheet
+  const sheet = spreadsheet.getSheetByName("Closed")
+
+  //Pull Dates from Dates sheet
+  const closing = sheet.getRange("A2:A100")
+
+  const closeddates = new Date(closing);
+
+  // Replace with the title of the multiple-choice question to update
+  const questionTitle = "Select a day";
+
+ // Define the days the organization is closed (e.g., Saturday = 6, Sunday = 0)
+  const closedDays = [closeddates]; // list of closed days
+
+  // Get today's date
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Normalize to midnight for comparison
+
+  // Get all days of the week with their corresponding dates
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const options = [];
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    const dayIndex = date.getDay();
+    const dateString = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+
+    // Skip the current date, closed days, and holidays
+    if (date.getTime() === today.getTime() || date.getTime() === closeddates.getTime()) {
+      continue;
+    }
+
+    const day = days[dayIndex];
+    options.push(`${day}, ${date.toLocaleDateString()}`);
+  }
+
+  // Find the multiple-choice question in the form
+  const items = form.getItems(FormApp.ItemType.MULTIPLE_CHOICE);
+  const question = items.find(item => item.getTitle() === questionTitle);
+  if (question) {
+    const multipleChoiceItem = question.asMultipleChoiceItem();
+    multipleChoiceItem.setChoices(options.map(option => multipleChoiceItem.createChoice(option)));
+  } else {
+    Logger.log(`Question titled '${questionTitle}' not found.`);
+  }
+}
