@@ -8,7 +8,7 @@ function updateFormWithDays() {
   //Pull Dates sheet from Master Sheet
   const sheet = spreadsheet.getSheetByName("Closed")
 
-  //Pull Dates from Dates sheet
+  //Pull Closed Dates from Dates sheet
   const closing = sheet.getRange("A2:A100")
 
   const closeddates = new Date(closing);
