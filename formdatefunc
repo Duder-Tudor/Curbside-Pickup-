@@ -1,40 +1,65 @@
+// Function to pull closed dates from the "Closed" sheet
+function getClosedDates() {
+  // Open the Master spreadsheet
+  const spreadsheet = SpreadsheetApp.openById("SPREADSHEET-ID")
+  
+  // Get the "Closed" sheet
+  const sheet = spreadsheet.getSheetByName("Closed");
+  if (!sheet) {
+    Logger.log("Sheet named 'Closed' not found.");
+    return [];
+  }
+
+  // Get the range of closed dates (assuming dates are in A2:A100)
+  const closingRange = sheet.getRange("A2:A100");
+  const closingValues = closingRange.getValues(); // Returns a 2D array
+
+  // Convert values to a flat array of date strings (YYYY-MM-DD format)
+  const closedDates = closingValues
+    .flat() // Flatten the 2D array to 1D
+    .filter(value => value instanceof Date) // Ensure only valid dates
+    .map(date => date.toISOString().split('T')[0]); // Format as YYYY-MM-DD
+
+  Logger.log("Closed Dates: " + closedDates);
+  return closedDates;
+}
+
 function updateFormWithDays() {
   // Open the Google Form by its ID
-  const form = FormApp.openById("file.id");
+  const form = FormApp.openById("FORM-ID");
 
   // Open the Master Sheet by its ID
-  const spreadsheet = SpreadsheetApp.openById("file.id");
-
-  //Pull Dates sheet from Master Sheet
-  const sheet = spreadsheet.getSheetByName("Closed")
-
-  //Pull Closed Dates from Dates sheet
-  const closing = sheet.getRange("A2:A100")
-
-  const closeddates = new Date(closing);
+  const spreadsheet = SpreadsheetApp.openById("SREADSHEET-ID");
 
   // Replace with the title of the multiple-choice question to update
   const questionTitle = "Select a day";
 
- // Define the days the organization is closed (e.g., Saturday = 6, Sunday = 0)
-  const closedDays = [closeddates]; // list of closed days
+    // Get closed dates from the "Closed" sheet
+  const closedDates = getClosedDates();
+
+  // Days to skip (such as summer sundays)
+  const closedDays = []; // Sunday = 0, Saturday = 6
+
 
   // Get today's date
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Normalize to midnight for comparison
 
+
   // Get all days of the week with their corresponding dates
   const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const options = [];
+
+
   for (let i = 0; i < 7; i++) {
     const date = new Date(today);
     date.setDate(today.getDate() + i);
     const dayIndex = date.getDay();
     const dateString = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
 
-    // Skip the current date, closed days, and holidays
-    if (date.getTime() === today.getTime() || date.getTime() === closeddates.getTime()) {
-      continue;
+    // Skip if it's today, a closed day, or a holiday from the sheet
+    if (date.getTime() === today.getTime() || closedDays.includes(dayIndex) || closedDates.includes(dateString)) {
+      continue; // Skip closed dates
     }
 
     const day = days[dayIndex];
