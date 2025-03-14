@@ -1,9 +1,9 @@
 function updateFormWithDays() {
   // Open the Google Form by its ID
-  const form = FormApp.openById("1Di7Beuw4uw54esZXxTUlPne_0gZqn4do7h6HfBx6sto");
+  const form = FormApp.openById("file.id");
 
   // Open the Master Sheet by its ID
-  const spreadsheet = SpreadsheetApp.openById("1EwuNdI-3KvBql2lelV31UG-J7YUlOhfAPGJ13VpGC7k");
+  const spreadsheet = SpreadsheetApp.openById("file.id");
 
   //Pull Dates sheet from Master Sheet
   const sheet = spreadsheet.getSheetByName("Closed")
